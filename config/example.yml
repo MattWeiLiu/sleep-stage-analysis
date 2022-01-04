@@ -1,0 +1,31 @@
+# '../data/
+data:
+  sleep_features_path: 'sleep_features/'
+  window_size: 9 # time length
+  feature_dims: 35
+
+train:
+  batch_size: 32
+  epochs: 200
+  cross_validation: True
+  num_folds: 5 # cross validation folds 
+  early_stop: True
+  patience: 30  # patience of early stop 
+  optimizer:
+    method: 'adam'  # adam, RMSprop
+    learning_rate: 1e-05
+    
+model:
+  loss: 'CategoricalCrossentropy'
+  l1_scale: 1e-04
+  l2_scale: 1e-04
+  lstm_nodes: [32, 32, 32]
+  dense_nodes: [32, 16, 16]
+  keep_drop: [0.3, 0.5]
+  output_dim: 6
+  activation: 'relu'  # relu, sigmoid
+
+save:
+  model: True
+  img: True
+  
