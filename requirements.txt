@@ -1,0 +1,9 @@
+# Function dependencies, for example:
+# package>=version
+numba
+scipy
+pandas
+openpyxl
+xlrd==1.2.0
+pyedflib
+google-cloud-storage
