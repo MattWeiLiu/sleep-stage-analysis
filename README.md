@@ -25,7 +25,7 @@ from source.DataPartition import DataPartition
 # data partition
 stage_path = 'path_to_STAGE.csv'
 # len(ppg): Original length of PPG signal
-data, label = F.data_partition(R, len(ppg), stage_path)
+data, label = F.data_partition(R, len(ppg), sqi, stage_path)
 ```
 
 **Tips**: **R peak detection** & **Data Partition** process must be used together and the usage  can refer to Sleep_FeatureExtraction.ipynb
