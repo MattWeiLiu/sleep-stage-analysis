@@ -9,7 +9,6 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, KFold
 
-
 def main():
     # Import Configuration
     config = Config(os.path.join(os.getcwd(), "config/{}".format(sys.argv[1])))
@@ -22,13 +21,8 @@ def main():
         inputs.append(data['data'])
         targets.append(data['label'])
 
-    inputs, targets = np.concatenate(inputs), np.concatenate(targets)
-
-    # normalize & one hot encoding
-    inputs_norm = (inputs - inputs.min(axis=1).min(axis=0))/(inputs.max(axis=1).max(axis=0) - inputs.min(axis=1).min(axis=0))
-    inputs_norm[np.isnan(inputs_norm)] = 0
-    targets = np.eye(6)[targets-11]
-    
+    inputs = np.array(inputs)
+    targets = np.array(targets)
     
     ## early stopping
     if config.train.early_stop:
@@ -44,7 +38,7 @@ def main():
         kfold = KFold(n_splits=config.train.num_folds, random_state=None)
 
         fold_no = 1
-        for train_i, test_i in kfold.split(inputs_norm):
+        for train_i, test_i in kfold.split(inputs):
 
             model = baseRNN(activation=config.model.activation, 
                             L1=float(config.model.l1_scale), 
@@ -66,15 +60,32 @@ def main():
                           optimizer=optimizer, 
                           metrics=["accuracy"])
 
+            X_train, y_train, X_test, y_test = inputs[train_i], targets[train_i], inputs[test_i], targets[test_i]
+            X_train, y_train, X_test, y_test = np.concatenate(X_train), np.concatenate(y_train), np.concatenate(X_test), np.concatenate(y_test)
+            
+            # normalize
+            norm_min = X_train.min(axis=1).min(axis=0)
+            norm_max = X_train.max(axis=1).max(axis=0)
+            X_train = (X_train - norm_min)/(norm_max - norm_min)
+            X_test  = (X_test - norm_min)/(norm_max - norm_min)
+            
+            # fill nan as 0
+            X_train[np.isnan(X_train)] = 0
+            X_test[np.isnan(X_test)]   = 0
+            
+            # label one hot encoding
+            y_train = np.eye(6)[y_train-11]
+            y_test  = np.eye(6)[y_test-11]
+
             print('------------------------------------------------------------------------')
             print('Training for fold {} ...'.format(fold_no))
-            history = model.fit(inputs_norm[train_i], 
-                                targets[train_i], 
+            history = model.fit(X_train, 
+                                y_train, 
                                 batch_size=config.train.batch_size, 
                                 epochs=config.train.epochs, 
                                 callbacks=[callback], 
                                 verbose=2, 
-                                validation_data=(inputs_norm[test_i], targets[test_i]))
+                                validation_data=(X_test, y_test))
             
             # save model
             if config.save.model:
@@ -109,7 +120,22 @@ def main():
         
     else:
         # train test split
-        X_train, X_test, y_train, y_test = train_test_split(inputs_norm, targets, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(inputs, targets, test_size=0.2, random_state=42)
+        X_train, y_train, X_test, y_test = np.concatenate(X_train), np.concatenate(y_train), np.concatenate(X_test), np.concatenate(y_test)
+
+        # normalize
+        norm_min = X_train.min(axis=1).min(axis=0)
+        norm_max = X_train.max(axis=1).max(axis=0)
+        X_train = (X_train - norm_min)/(norm_max - norm_min)
+        X_test  = (X_test - norm_min)/(norm_max - norm_min)
+        
+        # fill nan as 0
+        X_train[np.isnan(X_train)] = 0
+        X_test[np.isnan(X_test)]   = 0
+        
+        # label one hot encoding
+        y_train = np.eye(6)[y_train-11]
+        y_test  = np.eye(6)[y_test-11]
 
         model = baseRNN(activation=config.model.activation, 
                         L1=float(config.model.l1_scale), 
