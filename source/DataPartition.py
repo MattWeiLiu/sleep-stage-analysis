@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pandas as pd
 from collections import deque
@@ -10,7 +11,7 @@ class Partition(object):
     def __init__(self, Fs=2):        
         self.Fs = Fs
 
-    def data_partition(self, R, duration, stage_path, window=9, bidirectional=True):
+    def data_partition(self, R, duration, sqi, stage_path, window=9, bidirectional=True):
         
         STAGE = pd.read_csv(stage_path, index_col=0, encoding='unicode_escape')
         
@@ -19,6 +20,9 @@ class Partition(object):
 
         # annotation length
         length = len(annotation)
+
+        if length != len(sqi):
+            sys.exit('Warning: annotation length must equal to sqi length!')     
 
         if bidirectional:
             pad = int(window/2)
@@ -37,6 +41,8 @@ class Partition(object):
                 current_features = np.array(current_features)
             else:
                 current_features = np.zeros(31)
+            
+            current_features = np.append(current_features, sqi[i])   # append sqi information to current features vector
             features.append(current_features)
 
             if len(features) == window:
@@ -153,4 +159,3 @@ class Partition(object):
             VLF = np.nan
         return VLF, LF, HF, LHR
         
-
