@@ -1,6 +1,6 @@
 # Sleep stage analysis
 
-[GitHub](https://github.com/PranaQ-Matthew/sleep-stage-analysis)
+[GitHub]
 
 ### 1.R peak detection
 ```python
